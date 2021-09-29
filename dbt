@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+#
+# Wraps dbt execution. It will use dbt installed version or Docker image if not installed.
+
+dbt_version="0.20.2"
+
+# Check that at least one argument is paseed (the one to send to dbt)
+if [[ $# -lt 1 ]]; then 
+  echo "No dbt option passed." >&2
+  echo "Choose from {docs, source, init, clean, debug, deps, list, ls, snapshot, rpc, run,compile, parse, test, seed, run-operation}" >&2
+  exit 2
+fi
+
+# load env from .env file, if exist
+if test -f ".env"; then
+  . .env
+fi
+
+
+# if dbt is installed it uses dbt else uses docker image.
+if type dbt >/dev/null 2>&1; then
+  current_dbt_version=$(dbt --version 2>&1 | head -n 1 | cut -d " " -f 3)
+  # check installed local version is the same as expected
+  if [[ "$current_dbt_version" != "$dbt_version" ]]; then 
+    echo "Unexpected dbt version installed in local."
+    echo "  Expected: $dbt_version, Intalled: $current_dbt_version"
+    exit 4
+  fi
+  command=(dbt)
+else
+  if type docker >/dev/null 2>&1; then
+    command=("docker run \
+                --env DBT_DATASET=${DBT_DATASET} \
+                -p 8080:8080 \
+                --volume $(pwd)/:/usr/app \
+                --volume $(pwd)/profiles.yml:/root/.dbt/profiles.yml:ro \
+                --volume $(pwd)/${DBT_KEYFILE:-packlink-muggles-35a61cf7cd9a.json}:/root/.dbt/packlink-muggles-35a61cf7cd9a.json:ro \
+                fishtownanalytics/dbt:${dbt_version}")
+  else
+    echo "Trying to run the docker version but not installed."
+    exit 3
+  fi
+fi
+
+${command} $@

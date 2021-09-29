@@ -1,0 +1,17 @@
+# User credentials to access GCP BigQuery in Packlink data-lab project
+josemoreno-data-lab-404cb2f6b97c.json
+
+# PRoject profiles
+profiles.yml
+
+# DBT generated artifacts
+target/
+dbt_modules/
+logs/
+
+# User Environment variables
+.env
+
+# IDE artifacts
+#   Visual Studio Code
+.vscode/
