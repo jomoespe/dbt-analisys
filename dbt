@@ -19,7 +19,7 @@ fi
 
 # if dbt is installed it uses dbt else uses docker image.
 if type dbt >/dev/null 2>&1; then
-  current_dbt_version=$(dbt --version 2>&1 | head -n 1 | cut -d " " -f 3)
+  current_dbt_version=$(dbt --version 2>&1 | head -n 1 | cut -d " " -f 3  | tr -dc '[:print:]' )
   # check installed local version is the same as expected
   if [[ "$current_dbt_version" != "$dbt_version" ]]; then 
     echo "Unexpected dbt version installed in local."
